@@ -1,6 +1,7 @@
 # pathfinder-discord-bot
 
 PACKAGE STRUCTURE PROBABLY 
+```
 pathfinder-discord-bot/
 │
 ├── .env                          # Your secrets (gitignored)
@@ -61,3 +62,5 @@ pathfinder-discord-bot/
     ├── test_dice.py
     ├── test_agent.py
     └── test_lore.py
+
+```
