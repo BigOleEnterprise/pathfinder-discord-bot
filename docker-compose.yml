@@ -1,0 +1,29 @@
+services:
+  # MongoDB not needed - using Atlas Cloud
+  # mongodb:
+  #   image: mongodb/mongodb-community-server:latest
+  #   container_name: pathfinder_mongodb
+  #   ports:
+  #     - "27017:27017"
+  #   volumes:
+  #     - pathfinder_mongodb_data:/data/db
+  #   environment:
+  #     - MONGO_INITDB_DATABASE=pathfinder_bot
+  #   networks:
+  #     - pathfinder_network
+
+  bot:
+    build: .
+    container_name: pathfinder_bot
+    env_file:
+      - .env
+    volumes:
+      - .:/app  # Mount code for hot-reload during dev
+    restart: unless-stopped
+
+# volumes:
+#   pathfinder_mongodb_data:
+
+# networks:
+#   pathfinder_network:
+#     driver: bridge
