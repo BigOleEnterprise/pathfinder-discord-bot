@@ -1,0 +1,1 @@
+"""Cogs (command modules) package."""
