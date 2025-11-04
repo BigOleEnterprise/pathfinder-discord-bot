@@ -39,16 +39,17 @@ class PathfinderBot(commands.Bot):
                     logger.exception(f"Failed to load cog {cog_file.stem}: {e}")
 
         # Sync commands to Discord
-        if settings.discord_guild_id:
-            # Sync to specific guild for faster development
-            guild = discord.Object(id=settings.discord_guild_id)
-            self.tree.copy_global_to(guild=guild)
-            await self.tree.sync(guild=guild)
-            logger.info(f"Commands synced to guild {settings.discord_guild_id}")
-        else:
-            # Sync globally (takes up to 1 hour)
-            await self.tree.sync()
-            logger.info("Commands synced globally")
+        # Always sync globally for all servers (takes up to 1 hour to propagate)
+        await self.tree.sync()
+        logger.info("Commands synced globally")
+
+        # Also sync to specific guilds for instant updates during dev
+        if settings.guild_id_list:
+            for guild_id in settings.guild_id_list:
+                guild = discord.Object(id=guild_id)
+                self.tree.copy_global_to(guild=guild)
+                await self.tree.sync(guild=guild)
+                logger.info(f"Commands synced to guild {guild_id} (instant)")
 
     async def on_ready(self):
         """Called when the bot is ready."""

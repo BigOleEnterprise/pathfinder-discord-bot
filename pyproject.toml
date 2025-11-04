@@ -7,8 +7,10 @@ requires-python = ">=3.11"
 dependencies = [
     "discord.py>=2.3.0",
     "anthropic>=0.39.0",         # Claude API
+    "openai>=1.54.0",            # OpenAI embeddings
     "motor>=3.6.0",              # Async MongoDB driver
     "pymongo>=4.10.0",           # Sync MongoDB (for migrations/scripts)
+    "pymupdf>=1.24.0",           # PDF parsing
     "pydantic>=2.9.0",
     "pydantic-settings>=2.6.0",
     "python-dotenv>=1.0.0",

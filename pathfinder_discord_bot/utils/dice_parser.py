@@ -25,23 +25,7 @@ class DiceParser:
 
     @staticmethod
     def parse(notation: str) -> ParsedDiceRoll:
-        """
-        Parse dice notation string into groups and modifiers.
-
-        Examples:
-            "2d20 + 1d6 + 5" -> dice_groups=[(2, 20), (1, 6)], modifier=5
-            "3d6-2" -> dice_groups=[(3, 6)], modifier=-2
-            "1d20" -> dice_groups=[(1, 20)], modifier=0
-
-        Args:
-            notation: Dice notation string
-
-        Returns:
-            ParsedDiceRoll with dice groups and total modifier
-
-        Raises:
-            ValueError: If notation is invalid or empty
-        """
+        """Parse dice notation string (e.g., '2d20 + 1d6 + 5') into dice groups and modifiers."""
         if not notation or not notation.strip():
             raise ValueError("Dice notation cannot be empty")
 
@@ -75,15 +59,7 @@ class DiceParser:
 
     @staticmethod
     def format_notation(parsed: ParsedDiceRoll) -> str:
-        """
-        Format a ParsedDiceRoll back into readable notation.
-
-        Args:
-            parsed: ParsedDiceRoll to format
-
-        Returns:
-            Formatted string like "2d20 + 1d6 + 5"
-        """
+        """Format a ParsedDiceRoll back into readable notation (e.g., '2d20 + 1d6 + 5')."""
         parts = []
 
         # Add dice groups
