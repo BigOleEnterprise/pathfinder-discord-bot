@@ -43,22 +43,7 @@ class DiceService:
         keep_highest: int = 0,
         keep_lowest: int = 0,
     ) -> DiceRollResult:
-        """
-        Roll dice with optional modifiers and keep mechanics.
-
-        Args:
-            number_of_dice: Number of dice to roll (1-100)
-            sides_of_dice: Sides per die (4, 6, 8, 10, 12, 20, 100, or custom)
-            modifier: Flat bonus/penalty to add
-            keep_highest: Keep N highest dice (for advantage)
-            keep_lowest: Keep N lowest dice (for disadvantage)
-
-        Returns:
-            DiceRollResult with all roll details
-
-        Raises:
-            ValueError: If parameters are invalid
-        """
+        """Roll dice with optional modifiers and keep mechanics (advantage/disadvantage)."""
         # Validate inputs
         if number_of_dice < 1 or number_of_dice > DiceService.MAX_DICE:
             raise ValueError(f"Number of dice must be between 1 and {DiceService.MAX_DICE}")
@@ -100,20 +85,7 @@ class DiceService:
     def roll_complex(
         notation: str, advantage: bool = False, disadvantage: bool = False
     ) -> ComplexDiceRollResult:
-        """
-        Roll multiple dice groups from notation string.
-
-        Args:
-            notation: Dice notation like "2d20 + 1d6 + 5"
-            advantage: Roll with advantage (roll first die twice, keep highest)
-            disadvantage: Roll with disadvantage (roll first die twice, keep lowest)
-
-        Returns:
-            ComplexDiceRollResult with all group results
-
-        Raises:
-            ValueError: If notation is invalid or advantage/disadvantage misused
-        """
+        """Roll multiple dice groups from notation string with optional advantage/disadvantage."""
         from pathfinder_discord_bot.utils.dice_parser import DiceParser
 
         # Parse the notation

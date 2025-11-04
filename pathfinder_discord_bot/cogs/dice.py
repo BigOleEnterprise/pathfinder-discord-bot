@@ -32,7 +32,7 @@ class DiceCog(commands.Cog):
         comment: str | None = None,
         silent: bool = False,
     ):
-        """Roll dice using string notation with optional advantage/disadvantage."""
+        """Roll dice using notation with advantage/disadvantage support."""
         try:
             # Validate comment length
             if comment and len(comment) > 100:

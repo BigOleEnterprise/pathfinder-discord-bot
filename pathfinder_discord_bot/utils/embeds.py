@@ -14,16 +14,7 @@ class EmbedBuilder:
 
     @staticmethod
     def dice_roll(result: DiceRollResult, comment: str | None = None) -> discord.Embed:
-        """
-        Create embed for dice roll results.
-
-        Args:
-            result: DiceRollResult from dice service
-            comment: Optional label for the roll
-
-        Returns:
-            Formatted Discord embed
-        """
+        """Create formatted embed for dice roll results with optional comment label."""
         title = f"🎲 {comment}" if comment else "🎲 Dice Roll"
 
         embed = discord.Embed(
@@ -67,16 +58,7 @@ class EmbedBuilder:
     def complex_dice_roll(
         result: ComplexDiceRollResult, comment: str | None = None
     ) -> discord.Embed:
-        """
-        Create embed for complex dice roll results with multiple dice groups.
-
-        Args:
-            result: ComplexDiceRollResult from dice service
-            comment: Optional label for the roll
-
-        Returns:
-            Formatted Discord embed
-        """
+        """Create formatted embed for complex dice rolls with multiple dice groups."""
         title = f"🎲 {comment}" if comment else f"🎲 {result.notation}"
 
         embed = discord.Embed(

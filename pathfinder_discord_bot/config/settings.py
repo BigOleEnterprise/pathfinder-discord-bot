@@ -13,11 +13,21 @@ class Settings(BaseSettings):
 
     # Discord
     discord_bot_token: str
-    discord_guild_id: int | None = None  # Optional: for faster dev command sync
+    discord_guild_ids: str = ""  # Optional: comma-separated guild IDs for faster dev command sync
 
-    # OpenAI
+    @property
+    def guild_id_list(self) -> list[int]:
+        """Parse comma-separated guild IDs into list of integers."""
+        if not self.discord_guild_ids:
+            return []
+        return [int(gid.strip()) for gid in self.discord_guild_ids.split(",") if gid.strip()]
+
+    # Anthropic Claude
+    anthropic_api_key: str
+    anthropic_model: str = "claude-3-5-sonnet-20240620"
+
+    # OpenAI (for embeddings)
     openai_api_key: str
-    openai_model: str = "gpt-4o-mini"
     openai_embedding_model: str = "text-embedding-3-small"
 
     # MongoDB
