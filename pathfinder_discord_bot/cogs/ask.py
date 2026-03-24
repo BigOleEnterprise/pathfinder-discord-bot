@@ -201,7 +201,8 @@ class AskCog(commands.Cog):
             footer_text = f"Powered by The Network • Model: Claude"
             if search_results:
                 footer_text += f" • 📚 {len(search_results)} rulebook excerpts"
-
+            
+            
             embed.set_footer(text=footer_text)
 
             # Add View Sources button if rulebook context was used
