@@ -1,0 +1,37 @@
+# RAG Evaluation Questions for /eval-askbot
+#
+# Each question tests whether the RAG pipeline returns accurate PF2E rules answers.
+# The LLM judge checks if the answer covers all required_info_points.
+#
+# Format:
+#   - id: unique_snake_case_id        # used with /eval-askbot question_id: param
+#     category: topic_area            # for grouping in results
+#     question: "Your PF2E question"  # must be 10-500 chars (same as /ask)
+#     required_info_points:
+#       - "A fact the answer must convey (semantic match, not exact wording)"
+#       - "Another required fact"
+
+questions:
+  - id: persistent_damage
+    category: combat
+    question: "How does persistent damage work?"
+    required_info_points:
+      - "Triggers at the end of the target's turn instead of immediately"
+      - "After taking persistent damage, roll a flat DC 15 check. On success, the condition ends"
+      - "Target or ally can take two actions to attempt an additional flat check, with a reduced DC 10 flat check, or automatically ending at GM discretion"
+      - "You can have multiple different types of persistent damage simultaneously, but if you have multiple persistent damage of the same type, only the higher applies"
+      - "Persistent damage triggers once at the end of your turn (not considered different instances of damage)"
+      - "Usually ends naturally after 1 minute, at GM's discretion"
+
+  - id: off_guard
+    category: combat
+    question: "What does off-guard do?"
+    required_info_points:
+      - "-2 circumstance penalty to your AC"
+
+  - id: flanking
+    category: combat
+    question: "How does flanking work?"
+    required_info_points:
+      - "Two allies must be on opposite sides or corners of a foe"
+      - "Both flankers must be able to act, be wielding melee weapons or able to make unarmed attacks, and have the enemy within reach"

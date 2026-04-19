@@ -206,9 +206,10 @@ class AskCog(commands.Cog):
             embed.set_footer(text=footer_text)
 
             # Add View Sources button if rulebook context was used
-            view = SourcesView(search_results) if search_results else None
-
-            await interaction.followup.send(embed=embed, view=view)
+            if search_results:
+                await interaction.followup.send(embed=embed, view=SourcesView(search_results))
+            else:
+                await interaction.followup.send(embed=embed)
 
             logger.info(
                 f"Question answered for user {user_id}: "

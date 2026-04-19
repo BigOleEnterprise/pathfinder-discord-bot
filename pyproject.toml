@@ -17,6 +17,7 @@ dependencies = [
     "aiohttp>=3.10.0",
     "tenacity>=9.0.0",           # Retry logic for API calls
     "numpy>=2.0.0",              # For vector operations
+    "pyyaml>=6.0",               # YAML parsing for eval questions
 ]
 
 [project.optional-dependencies]

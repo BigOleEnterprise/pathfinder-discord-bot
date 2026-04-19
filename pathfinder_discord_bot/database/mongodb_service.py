@@ -82,7 +82,7 @@ class MongoDBService:
             logger.exception(f"Error clearing rulebook chunks: {e}")
             return 0
 
-    async def vector_search_rulebooks(
+    async def  vector_search_rulebooks(
         self, query_embedding: list[float], limit: int = 5, index_name: str = "vector_index"
     ) -> list[dict[str, Any]]:
         """Search rulebook chunks using vector similarity and return matching chunks with scores."""
