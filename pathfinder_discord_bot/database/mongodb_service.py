@@ -5,7 +5,7 @@ from typing import Any
 from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 from pymongo.errors import PyMongoError
 
-from pathfinder_discord_bot.database.models import QuestionLog
+from pathfinder_discord_bot.database.models import CombatSession, QuestionLog
 
 logger = logging.getLogger(__name__)
 
@@ -19,6 +19,7 @@ class MongoDBService:
         self.db: AsyncIOMotorDatabase = self.client[database_name]
         self.question_logs = self.db.question_logs
         self.rulebook_chunks = self.db.rulebook_chunks
+        self.combat_sessions = self.db.combat_sessions
 
     async def save_question_log(self, log: QuestionLog) -> str | None:
         """Save a question log to MongoDB and return the inserted document ID."""
@@ -72,6 +73,25 @@ class MongoDBService:
             logger.exception(f"Error saving rulebook chunks batch: {e}")
             return 0
 
+    async def get_existing_rulebook_sources(self) -> set[str]:
+        """Return the set of distinct source names already in rulebook_chunks."""
+        try:
+            sources = await self.rulebook_chunks.distinct("source")
+            return set(sources)
+        except PyMongoError as e:
+            logger.exception(f"Error fetching existing sources: {e}")
+            return set()
+
+    async def delete_rulebook_chunks_by_source(self, source: str) -> int:
+        """Delete all chunks for a specific source and return count deleted."""
+        try:
+            result = await self.rulebook_chunks.delete_many({"source": source})
+            logger.info(f"Deleted {result.deleted_count} chunks for source '{source}'")
+            return result.deleted_count
+        except PyMongoError as e:
+            logger.exception(f"Error deleting chunks for source '{source}': {e}")
+            return 0
+
     async def clear_rulebook_chunks(self) -> int:
         """Clear all rulebook chunks from MongoDB and return count of deleted documents."""
         try:
@@ -118,6 +138,63 @@ class MongoDBService:
         except Exception as e:
             logger.exception(f"Error in vector search: {e}")
             return []
+
+    # --- Combat session methods ---
+
+    async def save_combat_session(self, session: CombatSession) -> str | None:
+        """Upsert a combat session by thread_id."""
+        try:
+            result = await self.combat_sessions.replace_one(
+                {"thread_id": session.thread_id},
+                session.to_mongo_dict(),
+                upsert=True,
+            )
+            logger.info(f"Saved combat session for thread {session.thread_id}")
+            return str(result.upserted_id) if result.upserted_id else None
+        except PyMongoError as e:
+            logger.exception(f"Error saving combat session: {e}")
+            return None
+
+    async def update_combat_session(self, thread_id: int, update: dict[str, Any]) -> bool:
+        """Partial update of a combat session by thread_id."""
+        try:
+            result = await self.combat_sessions.update_one(
+                {"thread_id": thread_id},
+                {"$set": update},
+            )
+            return result.modified_count > 0
+        except PyMongoError as e:
+            logger.exception(f"Error updating combat session: {e}")
+            return False
+
+    async def get_combat_session(self, thread_id: int) -> dict[str, Any] | None:
+        """Fetch a combat session by thread_id."""
+        try:
+            return await self.combat_sessions.find_one({"thread_id": thread_id})
+        except PyMongoError as e:
+            logger.exception(f"Error fetching combat session: {e}")
+            return None
+
+    async def get_active_combats(self) -> list[dict[str, Any]]:
+        """Get all active (non-ended) combat sessions for restart rehydration."""
+        try:
+            cursor = self.combat_sessions.find({"is_active": True})
+            return await cursor.to_list(length=100)
+        except PyMongoError as e:
+            logger.exception(f"Error fetching active combats: {e}")
+            return []
+
+    async def end_combat_session(self, thread_id: int) -> bool:
+        """Mark a combat session as inactive."""
+        try:
+            result = await self.combat_sessions.update_one(
+                {"thread_id": thread_id},
+                {"$set": {"is_active": False}},
+            )
+            return result.modified_count > 0
+        except PyMongoError as e:
+            logger.exception(f"Error ending combat session: {e}")
+            return False
 
     async def ping(self) -> bool:
         """Ping MongoDB to verify connection is healthy."""

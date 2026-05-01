@@ -1,5 +1,6 @@
 """MongoDB data models for question/response logging and rulebook storage."""
 from datetime import datetime
+from enum import StrEnum
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -85,3 +86,70 @@ class RulebookChunk(BaseModel):
     def to_mongo_dict(self) -> dict[str, Any]:
         """Convert to MongoDB-ready dictionary."""
         return self.model_dump()
+
+
+class TurnPhase(StrEnum):
+    """Current phase of a combat turn."""
+
+    SETUP = "setup"  # adding combatants, not yet started
+    PLAYER_ACTING = "player_acting"  # waiting for player to act / say "done"
+    MOB_DECIDING = "mob_deciding"  # Claude is choosing mob action
+    AWAITING_HIT_CONFIRM = "awaiting_hit_confirm"  # bot rolled attack, waiting hit/miss
+    AWAITING_SAVE_CONFIRM = "awaiting_save_confirm"  # bot asked for save, waiting pass/fail
+    BETWEEN_TURNS = "between_turns"  # turn just ended, about to advance
+
+
+class Condition(BaseModel):
+    """A PF2E condition on a combatant."""
+
+    name: str = Field(..., description="Condition name (e.g., frightened, sickened)")
+    value: int | None = Field(None, description="Numeric value if applicable (e.g., frightened 2)")
+    duration: int | None = Field(None, description="Rounds remaining, if timed")
+
+
+class Combatant(BaseModel):
+    """A single creature or character in combat."""
+
+    name: str = Field(..., description="Display name, used as identifier")
+    max_hp: int | None = Field(None, description="Maximum HP (known for mobs, None for players)")
+    current_hp: int | None = Field(None, description="Current HP (tracked for mobs, None for players)")
+    initiative: float = Field(..., description="Initiative value")
+    initiative_modifier: int = Field(0, description="Initiative modifier (for mobs, rolled by bot)")
+    conditions: list[Condition] = Field(default_factory=list, description="Active conditions")
+    is_player: bool = Field(True, description="True for PCs (user-controlled), False for mobs")
+    notes: str = Field("", description="Freeform notes")
+
+
+class CombatSession(BaseModel):
+    """Full combat state persisted to MongoDB."""
+
+    thread_id: int = Field(..., description="Discord thread ID")
+    channel_id: int = Field(..., description="Parent channel ID")
+    guild_id: int = Field(..., description="Guild ID")
+    creator_id: int = Field(..., description="User who started the combat")
+
+    combatants: list[Combatant] = Field(default_factory=list, description="All combatants")
+    current_turn_index: int = Field(0, description="Index into sorted combatants list")
+    round_number: int = Field(0, description="Current round (0 = setup phase)")
+    turn_phase: TurnPhase = Field(TurnPhase.SETUP, description="Current turn phase")
+
+    # Pending action context for multi-step mob turns
+    pending_action: dict[str, Any] = Field(
+        default_factory=dict, description="Context for in-progress mob action"
+    )
+
+    is_active: bool = Field(True, description="Whether combat is ongoing")
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+    def to_mongo_dict(self) -> dict[str, Any]:
+        """Convert to MongoDB-ready dictionary."""
+        data = self.model_dump()
+        data["turn_phase"] = self.turn_phase.value
+        return data
+
+    @classmethod
+    def from_mongo_dict(cls, data: dict[str, Any]) -> "CombatSession":
+        """Reconstruct from a MongoDB document."""
+        data.pop("_id", None)
+        return cls(**data)

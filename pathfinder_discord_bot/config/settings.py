@@ -42,6 +42,10 @@ class Settings(BaseSettings):
     ask_rate_limit_requests: int = 5
     ask_rate_limit_window_seconds: int = 600
 
+    # Combat
+    combat_max_combatants: int = 30
+    combat_max_active_per_guild: int = 10
+
 
 # Singleton instance
 settings = Settings()
